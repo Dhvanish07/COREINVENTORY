@@ -1,0 +1,16 @@
+{
+  "name": "coreinventory",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace @coreinventory/api\" \"npm run dev --workspace @coreinventory/web\"",
+    "build": "npm run build --workspace @coreinventory/web",
+    "start": "npm run start --workspace @coreinventory/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

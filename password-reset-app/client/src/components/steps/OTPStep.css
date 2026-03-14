@@ -1,0 +1,39 @@
+@import '../steps/EmailStep.css';
+
+.otp-step {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.email-display {
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+.email-display p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.email-display strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.otp-input {
+  font-family: 'Courier New', monospace;
+  font-size: 24px;
+  letter-spacing: 12px;
+  text-align: center;
+  font-weight: 600;
+  padding: 16px 14px !important;
+}
+
+.otp-input::placeholder {
+  letter-spacing: 12px;
+  color: #ccc;
+}
