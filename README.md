@@ -1,19 +1,88 @@
 # CoreInventory
 
-Full-stack SaaS Inventory Management System for warehouses and businesses.
+CoreInventory is a full-stack inventory and warehouse operations platform with role-based workflows for **Inventory Manager** and **Warehouse Staff**.
+
+It includes:
+- Multi-warehouse stock tracking
+- Product assignment by warehouse
+- Receiving, delivery, transfer, and adjustment workflows
+- Manager and staff dashboards
+- JWT authentication and OTP password reset
+- CSV/PDF report export
+
+---
 
 ## Tech Stack
 
-- Frontend: Next.js (React), Tailwind CSS, Framer Motion, Recharts, Lucide icons
-- Backend: Node.js, Express.js, REST API
-- Database: MySQL (phpMyAdmin compatible)
-- Auth: JWT + OTP password reset
+### Frontend
+- Next.js 14 (App Router)
+- React 18
+- TypeScript
+- Tailwind CSS
+- Recharts
 
-## Run Locally
+### Backend
+- Node.js
+- Express
+- MySQL (`mysql2`)
+- JWT (`jsonwebtoken`)
+- Resend (OTP email)
 
-1. Create env files:
+### Monorepo
+- npm workspaces
+- Root scripts orchestrate API + web together
 
-### `apps/api/.env`
+---
+
+## Repository Structure
+
+```text
+.
+├─ apps/
+│  ├─ api/      # Express + MySQL REST API
+│  └─ web/      # Next.js frontend
+├─ password-reset-app/ # separate reference app retained in repo
+├─ package.json
+└─ README.md
+```
+
+---
+
+## Role Workflows
+
+### Inventory Manager
+- Dashboard
+- Receiving
+- Add Product
+- Products
+- Warehouses
+- Delivery Scheduling
+- Profile
+
+### Warehouse Staff
+- Dashboard
+- Internal Transfer
+- Picking
+- Shelving
+- Counting
+- Profile
+
+> Warehouse Staff is intentionally blocked from manager Receiving and Delivery Scheduling screens.
+
+---
+
+## Prerequisites
+
+- Node.js 18+
+- npm 9+
+- MySQL 8+ (or compatible)
+
+---
+
+## Environment Configuration
+
+### 1) API env
+Create `apps/api/.env` from `apps/api/.env.example`.
 
 ```env
 PORT=5000
@@ -25,72 +94,65 @@ DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=
 DB_NAME=coreinventory
+RESEND_API_KEY=your_resend_key
+RESEND_FROM_EMAIL=onboarding@resend.dev
+RESEND_TEST_RECIPIENT=your_test_email@example.com
 ```
 
-### `apps/web/.env.local`
+### 2) Web env
+Create `apps/web/.env.local` from `apps/web/.env.local.example`.
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
 
-2. Install dependencies and run:
+---
+
+## Run Locally
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Run API + web together:
+
+```bash
 npm run dev
 ```
 
-- Web: http://localhost:3000
-- API: http://localhost:5000
+Or run separately:
 
-## Folder Structure
+```bash
+npm run dev --workspace @coreinventory/api
+npm run dev --workspace @coreinventory/web
+```
 
-- apps/api → Express + MySQL backend
-- apps/web → Next.js frontend
+URLs:
+- Web: `http://localhost:3000`
+- API: `http://localhost:5000`
 
-## Monorepo Structure
+Build web app:
 
-- [apps/api/src/server.js](apps/api/src/server.js)
-- [apps/api/src/models/User.js](apps/api/src/models/User.js)
-- [apps/api/src/models/Product.js](apps/api/src/models/Product.js)
-- [apps/api/src/models/Warehouse.js](apps/api/src/models/Warehouse.js)
-- [apps/api/src/models/StockMovement.js](apps/api/src/models/StockMovement.js)
-- [apps/api/src/models/Activity.js](apps/api/src/models/Activity.js)
-- [apps/api/src/controllers](apps/api/src/controllers)
-- [apps/api/src/routes](apps/api/src/routes)
-- [apps/web/app/page.tsx](apps/web/app/page.tsx) (Landing page)
-- [apps/web/app/(auth)](apps/web/app/(auth)) (Login, signup, OTP reset)
-- [apps/web/app/dashboard/page.tsx](apps/web/app/dashboard/page.tsx)
-- [apps/web/components/dashboard](apps/web/components/dashboard)
-- [apps/web/components/landing](apps/web/components/landing)
+```bash
+npm run build --workspace @coreinventory/web
+```
 
-## Database Schema
+---
 
-### User
-- `name`, `email`, `password_hash`, `role`
+## Seed / Default Admin
 
-### Password Reset
-- `otp_code`, `expires_at`, `used_at`, `user_id`
+On API startup, default admin is ensured:
+- Email: `admin@coreinventory.app`
+- Password: `Admin@123`
 
-### Warehouse
-- `name`, `code`, `location`, `capacity`, `is_active`
+You can also call seed endpoint:
+- `POST /api/seed`
 
-### Product
-- `name`, `sku`, `category`, `unit`
-- `low_stock_threshold`, `total_stock`
-- `product_stock` table with `warehouse`, `quantity`, `location_note`
+---
 
-### StockMovement
-- `movement_type`: `receipt | delivery | transfer | adjustment`
-- `status`: `draft | waiting | ready | done | cancelled`
-- `reference_no`, `supplier`, `notes`
-- `source_warehouse_id`, `destination_warehouse_id`
-- `stock_movement_items` with `product_id`, `quantity`
-
-### Activity
-- `action`, `entity_type`, `entity_id`, `meta_json`, `user_id`
-
-## REST API Routes
+## API Overview
 
 ### Auth
 - `POST /api/auth/signup`
@@ -98,12 +160,7 @@ npm run dev
 - `POST /api/auth/forgot-password`
 - `POST /api/auth/reset-password`
 - `GET /api/auth/me`
-
-### Warehouses
-- `GET /api/warehouses`
-- `POST /api/warehouses`
-- `PUT /api/warehouses/:id`
-- `DELETE /api/warehouses/:id`
+- `PUT /api/auth/me`
 
 ### Products
 - `GET /api/products`
@@ -111,41 +168,145 @@ npm run dev
 - `PUT /api/products/:id`
 - `DELETE /api/products/:id`
 
-### Stock Movements / Ledger
+### Warehouses
+- `GET /api/warehouses`
+- `POST /api/warehouses`
+- `PUT /api/warehouses/:id`
+- `DELETE /api/warehouses/:id`
+
+### Movements
 - `GET /api/movements`
 - `POST /api/movements`
 - `PATCH /api/movements/:id/status`
 - `GET /api/movements/ledger`
 
-### Dashboard / Reports / Seed
+### Dashboard / Reports
 - `GET /api/dashboard/summary`
 - `GET /api/reports/csv`
 - `GET /api/reports/pdf`
-- `POST /api/seed`
 
-## Implemented Product Modules
+---
 
-- Landing page (dark SaaS design, glassmorphism, motion animations)
-- Authentication pages (JWT + OTP reset)
-- Dashboard with KPI cards and charts
-- Product Management with filters + SKU search
-- Receipts workflow
-- Delivery Orders workflow
-- Internal Transfers workflow
-- Inventory Adjustments workflow
-- Activity timeline + movement history
-- Multi-warehouse support
-- Low stock indicators
-- CSV/PDF export
-- Loading skeletons and responsive UI
+## All Database Tables
 
-## Dummy Data
+The application currently uses these MySQL tables:
 
-To load sample data and default admin credentials:
+1. `users`
+2. `password_resets`
+3. `warehouses`
+4. `products`
+5. `product_stock`
+6. `stock_movements`
+7. `stock_movement_items`
+8. `activities`
 
-- Run app
-- Trigger `Load Dummy Data` from dashboard quick actions
+### 1) `users`
+- `id` (PK, bigint unsigned, auto increment)
+- `name` (varchar 120)
+- `email` (varchar 190, unique)
+- `password_hash` (varchar 255)
+- `role` (enum: `admin`, `manager`, `operator`)
+- `is_active` (tinyint(1))
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
 
-Default credentials:
-- `admin@coreinventory.app`
-- `Admin@123`
+### 2) `password_resets`
+- `id` (PK, bigint unsigned, auto increment)
+- `user_id` (FK → `users.id`)
+- `otp_code` (varchar 10)
+- `expires_at` (datetime)
+- `used_at` (datetime, nullable)
+- `created_at` (timestamp)
+
+### 3) `warehouses`
+- `id` (PK, bigint unsigned, auto increment)
+- `name` (varchar 150)
+- `code` (varchar 40, unique)
+- `location` (varchar 255)
+- `capacity` (int unsigned)
+- `is_active` (tinyint(1))
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
+
+### 4) `products`
+- `id` (PK, bigint unsigned, auto increment)
+- `name` (varchar 200)
+- `sku` (varchar 80, unique)
+- `category` (varchar 120)
+- `unit` (varchar 40, default `pcs`)
+- `low_stock_threshold` (int, default 10)
+- `total_stock` (int, default 0)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
+
+### 5) `product_stock`
+- `id` (PK, bigint unsigned, auto increment)
+- `product_id` (FK → `products.id`)
+- `warehouse_id` (FK → `warehouses.id`)
+- `quantity` (int, default 0)
+- `location_note` (varchar 255, nullable)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
+
+### 6) `stock_movements`
+- `id` (PK, bigint unsigned, auto increment)
+- `reference_no` (varchar 50, unique)
+- `movement_type` (enum: `receipt`, `delivery`, `transfer`, `adjustment`)
+- `status` (enum: `draft`, `waiting`, `ready`, `done`, `cancelled`)
+- `supplier` (varchar 180, nullable)
+- `notes` (text, nullable)
+- `source_warehouse_id` (FK → `warehouses.id`, nullable)
+- `destination_warehouse_id` (FK → `warehouses.id`, nullable)
+- `created_by` (FK → `users.id`, nullable)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
+
+### 7) `stock_movement_items`
+- `id` (PK, bigint unsigned, auto increment)
+- `movement_id` (FK → `stock_movements.id`)
+- `product_id` (FK → `products.id`)
+- `quantity` (int)
+- `created_at` (timestamp)
+
+### 8) `activities`
+- `id` (PK, bigint unsigned, auto increment)
+- `action` (varchar 200)
+- `entity_type` (varchar 80)
+- `entity_id` (varchar 80, nullable)
+- `meta_json` (longtext, nullable)
+- `user_id` (FK → `users.id`, nullable)
+- `created_at` (timestamp)
+
+---
+
+## Operational Notes
+
+- Stock is finalized when movement status is set to `done`.
+- Transfer enforces **Transfer From** and **Transfer To** warehouse selection.
+- Product assignment is tracked in `product_stock` per warehouse.
+- Dashboard UI is resilient to partial API failures and shows fallback state instead of blank screens.
+
+---
+
+## Troubleshooting
+
+### `npm run dev` fails at root
+If root `npm run dev` exits with port or stale cache issues:
+
+```powershell
+Get-Process -Name node -ErrorAction SilentlyContinue | Stop-Process -Force
+Remove-Item "apps/web/.next" -Recurse -Force -ErrorAction SilentlyContinue
+npm run dev --workspace @coreinventory/api
+npm run dev --workspace @coreinventory/web
+```
+
+### Next.js missing chunk / module errors (`Cannot find module './xxx.js'`)
+- Stop all Node processes
+- Delete `apps/web/.next`
+- Restart web dev server
+
+---
+
+## License
+
+Private project repository.
