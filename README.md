@@ -38,12 +38,125 @@ It includes:
 
 ```text
 .
-├─ apps/
-│  ├─ api/      # Express + MySQL REST API
-│  └─ web/      # Next.js frontend
-├─ password-reset-app/ # separate reference app retained in repo
 ├─ package.json
-└─ README.md
+├─ README.md
+├─ apps/
+│  ├─ api/
+│  │  ├─ package.json
+│  │  └─ src/
+│  │     ├─ server.js
+│  │     ├─ config/
+│  │     │  ├─ db.js
+│  │     │  └─ mysql.js
+│  │     ├─ controllers/
+│  │     │  ├─ authController.js
+│  │     │  ├─ dashboardController.js
+│  │     │  ├─ movementController.js
+│  │     │  ├─ productController.js
+│  │     │  ├─ reportController.js
+│  │     │  ├─ seedController.js
+│  │     │  └─ warehouseController.js
+│  │     ├─ middleware/
+│  │     │  ├─ auth.js
+│  │     │  └─ rbac.js
+│  │     ├─ models/
+│  │     │  ├─ Activity.js
+│  │     │  ├─ Product.js
+│  │     │  ├─ StockMovement.js
+│  │     │  ├─ User.js
+│  │     │  └─ Warehouse.js
+│  │     ├─ routes/
+│  │     │  ├─ authRoutes.js
+│  │     │  ├─ dashboardRoutes.js
+│  │     │  ├─ movementRoutes.js
+│  │     │  ├─ productRoutes.js
+│  │     │  ├─ reportRoutes.js
+│  │     │  ├─ seedRoutes.js
+│  │     │  └─ warehouseRoutes.js
+│  │     └─ utils/
+│  │        ├─ bootstrap.js
+│  │        ├─ generateOtp.js
+│  │        ├─ generateToken.js
+│  │        ├─ inventoryService.js
+│  │        ├─ logActivity.js
+│  │        ├─ reference.js
+│  │        ├─ roles.js
+│  │        └─ sendResetOtpEmail.js
+│  └─ web/
+│     ├─ next-env.d.ts
+│     ├─ next.config.js
+│     ├─ package.json
+│     ├─ postcss.config.js
+│     ├─ tailwind.config.ts
+│     ├─ tsconfig.json
+│     ├─ app/
+│     │  ├─ globals.css
+│     │  ├─ layout.tsx
+│     │  ├─ page.tsx
+│     │  ├─ (auth)/
+│     │  │  ├─ layout.tsx
+│     │  │  ├─ forgot-password/
+│     │  │  │  └─ page.tsx
+│     │  │  ├─ login/
+│     │  │  │  └─ page.tsx
+│     │  │  └─ signup/
+│     │  │     └─ page.tsx
+│     │  └─ dashboard/
+│     │     └─ page.tsx
+│     ├─ components/
+│     │  ├─ dashboard/
+│     │  │  ├─ ActivityList.tsx
+│     │  │  ├─ DataTables.tsx
+│     │  │  ├─ KpiCards.tsx
+│     │  │  ├─ ManagerDashboard.tsx
+│     │  │  ├─ QuickActions.tsx
+│     │  │  ├─ Sidebar.tsx
+│     │  │  ├─ StaffDashboard.tsx
+│     │  │  └─ TrendChart.tsx
+│     │  ├─ landing/
+│     │  │  ├─ Benefits.tsx
+│     │  │  ├─ DashboardPreview.tsx
+│     │  │  ├─ Features.tsx
+│     │  │  ├─ Footer.tsx
+│     │  │  └─ Hero.tsx
+│     │  └─ ui/
+│     │     ├─ badge.tsx
+│     │     ├─ button.tsx
+│     │     ├─ card.tsx
+│     │     ├─ input.tsx
+│     │     └─ skeleton.tsx
+│     ├─ lib/
+│     │  ├─ api.ts
+│     │  ├─ auth.ts
+│     │  └─ utils.ts
+│     └─ types/
+│        └─ index.ts
+└─ password-reset-app/
+   ├─ package.json
+   ├─ QUICKSTART.md
+   ├─ README.md
+   ├─ client/
+   │  ├─ index.html
+   │  ├─ package.json
+   │  ├─ vite.config.js
+   │  └─ src/
+   │     ├─ App.css
+   │     ├─ App.jsx
+   │     ├─ index.css
+   │     ├─ main.jsx
+   │     └─ components/
+   │        ├─ PasswordResetForm.css
+   │        ├─ PasswordResetForm.jsx
+   │        └─ steps/
+   │           ├─ EmailStep.css
+   │           ├─ EmailStep.jsx
+   │           ├─ OTPStep.css
+   │           ├─ OTPStep.jsx
+   │           ├─ PasswordStep.css
+   │           └─ PasswordStep.jsx
+   └─ server/
+      ├─ index.js
+      └─ package.json
 ```
 
 ---
@@ -108,35 +221,91 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api
 
 ---
 
-## Run Locally
+## Run Projects Locally
 
-Install dependencies:
+### A) Run CoreInventory (apps/api + apps/web)
+
+1. Open terminal in the repository root.
+
+2. Install root workspace dependencies:
 
 ```bash
 npm install
 ```
 
-Run API + web together:
+3. Create API env file:
+   - Copy `apps/api/.env.example` to `apps/api/.env`
+   - Fill your MySQL + JWT + Resend values.
+
+4. Create web env file:
+   - Copy `apps/web/.env.local.example` to `apps/web/.env.local`
+   - Set `NEXT_PUBLIC_API_URL` (default `http://localhost:5000/api`).
+
+5. Ensure MySQL is running and `DB_NAME` exists (example: `coreinventory`).
+
+6. Start both API and web together:
 
 ```bash
 npm run dev
 ```
 
-Or run separately:
+7. Open:
+   - Web: `http://localhost:3000`
+   - API health: `http://localhost:5000/`
+
+8. (Optional) Run each service separately:
 
 ```bash
 npm run dev --workspace @coreinventory/api
 npm run dev --workspace @coreinventory/web
 ```
 
-URLs:
-- Web: `http://localhost:3000`
-- API: `http://localhost:5000`
-
-Build web app:
+9. Production build/start (web):
 
 ```bash
 npm run build --workspace @coreinventory/web
+npm run start --workspace @coreinventory/web
+```
+
+### B) Run Password Reset App (`password-reset-app`)
+
+1. Move into the app directory:
+
+```bash
+cd password-reset-app
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Configure backend env:
+   - Copy `server/.env.example` to `server/.env`
+   - Set `RESEND_API_KEY`, `PORT` (default `3001`), and `CLIENT_URL` (default `http://localhost:5173`).
+
+4. Start client + server together:
+
+```bash
+npm run dev
+```
+
+5. Open:
+   - Client: `http://localhost:5173`
+   - Server: `http://localhost:3001`
+
+6. (Optional) Run separately:
+
+```bash
+npm run server
+npm run client
+```
+
+7. Build client:
+
+```bash
+npm run build
 ```
 
 ---
